@@ -6,6 +6,8 @@ import time
 import sys
 import glob
 
+import msgorganizer
+
 if len(sys.argv) != 2:
     print ('ERROR, must provide expid')
     raise
@@ -27,12 +29,12 @@ file = open(fp_log, 'w')
 
 
 
-message = []
-N_MESSAGE = len(glob.glob('./data/compressed/compress_adv_2740/*'))#we are suppose to receive a pre-defined number of frame, no more
-print (f'will wait and receive #{N_MESSAGE} messages')
+msg = msgorganizer.Msg('./data/compressed/compress_adv_2740/*')
+#N_MESSAGE = len(glob.glob('./data/compressed/compress_adv_2740/*'))#we are suppose to receive a pre-defined number of frame, no more
+print (f'will wait and receive #{len(msg)} messages')
 
-frame_count = 0
-
+byteidx = 0
+msgidx_list = set()#list of msg index received sofar
 #for i in range(N_MESSAGE):
 while True:#always receive frames, never breaks
     conn, addr = s.accept()
@@ -42,21 +44,24 @@ while True:#always receive frames, never breaks
         btime = time.time()
         d = conn.recv(1024*1024)
         if not d: break
-        else: message.append(d)
-            
-        received_time = time.time()
-        transfer_time = (received_time - btime)*1000
-        #print (f"received data took: {transfer_time} ms, frame counted sofar: {frame_count}")
-        frame_count += 1
+        else:
+            print (f"just received data of len:{len(d)}")
+            byteidx += len(d)
+            if msg.getMsgIndex(byteidx) > -1:
+                if byteidx not in msgidx_list:
+                    msgidx_list.add(byteidx)
+                    received_time = time.time()
+                    transfer_time = (received_time - btime)*1000
+                    print (f'New message received, msg_index: {len(msgidx_list)}, byte_index: {byteidx}, received_time:{received_time}, transfer_time: {transfer_time}')
     
     print (f"total transmission time for all packets: {time.time() - btime0} seconds")
     
-    dat = [frame_count, received_time, transfer_time]
-    file.write(f'{dat}\n')
+#     dat = [frame_count, received_time, transfer_time]
+#     file.write(f'{dat}\n')
     
     #logging section
     
-    #parse data, to be extended if future content evaluation required
-    #message_decoded = '\n'.join(s.decode('utf-8', 'ignore') for s in message)
-    file.flush()
+    #####parse data, to be extended if future content evaluation required
+    #####message_decoded = '\n'.join(s.decode('utf-8', 'ignore') for s in message)
+#    file.flush()
     
