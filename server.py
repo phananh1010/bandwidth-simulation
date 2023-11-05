@@ -39,11 +39,11 @@ byteidx = 0
 msgidx_list = set()#list of msg index received sofar
 log = []
 #for i in range(N_MESSAGE):
-while True:#always receive frames, never breaks
-    conn, addr = s.accept()
-    btime0 = time.time()
-    print (f'Accepting new connections')
-    while True:
+
+conn, addr = s.accept()
+btime0 = time.time()
+print (f'Accepting new connections')
+while True:
         btime = time.time()
         d = conn.recv(1024*1024)
         if not d: break
@@ -57,8 +57,9 @@ while True:#always receive frames, never breaks
                     transfer_time = (received_time - btime)*1000
                     #print (f'New message received, msg_index: {len(msgidx_list)}, byte_index: {byteidx}, received_time:{received_time}, transfer_time: {transfer_time}')
                     log.append(received_time)
-    print (f"total transmission time for all packets: {time.time() - btime0} seconds")
-    log = [item - log[0] for item in log[1:]]
-    pickle.dump(log, filelog)
-    expid += 1
+print (f"total transmission time for all packets: {time.time() - btime0} seconds")
+log = [item - log[0] for item in log[1:]]
+pickle.dump(log, filelog)
+
+s.close()
     
