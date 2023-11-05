@@ -5,8 +5,10 @@ import socket
 import time
 import sys
 import glob
+import pickle
 
 import msgorganizer
+import header
 
 if len(sys.argv) != 2:
     print ('ERROR, must provide expid')
@@ -24,17 +26,18 @@ s.listen(1)
 
 ##log session, write pacte received data to file
 
-fp_log = f'./logs/datapacket_arrival_log_exp{expid}'
-file = open(fp_log, 'w')
+fp_log = header.LOG_FILETEMPLATE.format(expid)
+filelog = open(fp_log, 'wb')
 
 
 
-msg = msgorganizer.Msg('./data/compressed/compress_adv_2740/*')
+msg = msgorganizer.Msg(expid)
 #N_MESSAGE = len(glob.glob('./data/compressed/compress_adv_2740/*'))#we are suppose to receive a pre-defined number of frame, no more
 print (f'will wait and receive #{len(msg)} messages')
 
 byteidx = 0
 msgidx_list = set()#list of msg index received sofar
+log = []
 #for i in range(N_MESSAGE):
 while True:#always receive frames, never breaks
     conn, addr = s.accept()
@@ -45,23 +48,17 @@ while True:#always receive frames, never breaks
         d = conn.recv(1024*1024)
         if not d: break
         else:
-            print (f"just received data of len:{len(d)}")
+            #print (f"just received data of len:{len(d)}")
             byteidx += len(d)
             if msg.getMsgIndex(byteidx) > -1:
                 if byteidx not in msgidx_list:
                     msgidx_list.add(byteidx)
                     received_time = time.time()
                     transfer_time = (received_time - btime)*1000
-                    print (f'New message received, msg_index: {len(msgidx_list)}, byte_index: {byteidx}, received_time:{received_time}, transfer_time: {transfer_time}')
-    
+                    #print (f'New message received, msg_index: {len(msgidx_list)}, byte_index: {byteidx}, received_time:{received_time}, transfer_time: {transfer_time}')
+                    log.append(received_time)
     print (f"total transmission time for all packets: {time.time() - btime0} seconds")
-    
-#     dat = [frame_count, received_time, transfer_time]
-#     file.write(f'{dat}\n')
-    
-    #logging section
-    
-    #####parse data, to be extended if future content evaluation required
-    #####message_decoded = '\n'.join(s.decode('utf-8', 'ignore') for s in message)
-#    file.flush()
+    log = [item - log[0] for item in log[1:]]
+    pickle.dump(log, filelog)
+    expid += 1
     

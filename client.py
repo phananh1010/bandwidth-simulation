@@ -5,15 +5,21 @@
 import socket
 import time
 import pickle
+import sys
 
 
 import msgorganizer
-
+import header
 
 host = "10.0.0.56"
 port = 1891
 
-msg = msgorganizer.Msg('./data/compressed/compress_adv_2740/*')
+if len(sys.argv) != 2:
+    print ('!!!!!!!!!!!!!!!!!!ERROR, must provide expid!!!!!!!!!!!!!!!!!!!!!')
+    raise
+expid = int(sys.argv[1]) #experimental identifier
+
+msg = msgorganizer.Msg(expid)
 #fp = './data/compressed/compress_adv_2740/compress_201.pkl'
 #fp_list = glob.glob('./data/compressed/compress_adv_2740/*')
 #dat_dict = {fp:open(fp, 'rb').read() for fp in fp_list}
@@ -23,5 +29,5 @@ s.connect((host, port))
 #for i in range(1):#send 1 package, 
 for fp, dat in msg:
     s.sendall(dat)
-    time.sleep(1/33)
+    time.sleep(1/header.FPS)
 s.close()
