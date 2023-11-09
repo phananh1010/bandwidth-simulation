@@ -4,7 +4,10 @@ import pickle
 
 import header
 
+
+
 class Msg:
+    #TODO: create message data structure for the server to send
     def __init__(self, expid):
         #TODO: read list of input frames from file, example: './data/compressed/compress_adv_2740/*'
         #self.fptemplate = fptemplate #'./data/compressed/compress_adv_2740/*'
@@ -13,7 +16,7 @@ class Msg:
         
         self.fparse                 = FILEPARSER()
         self.dat_dict, self.fp_list = self.fparse.return_dat(expid)
-        self.expid_dict             = self.fparse.return_expid_dict()
+        self.expid_dict             = self.fparse.return_metadict()
         self.byteIndexList          = self.initializeByteIndex()
         
     def initializeByteIndex(self):
@@ -49,12 +52,12 @@ class Msg:
         return [self.dat_dict[fp] for fp in self.fp_list]
     
 class FILEPARSER:
-    #TODO: read file and parse data, and generate simulate dat dict
+    #TODO: read file and parse data, and generate simulate dat dict, provide simulated data to Msg class
     DUMMY_FPNAME = 'dummyfp'#key of output datdict is dummy filepath, so here is dummy
     def __init__(self):
         self.fptemplate = header.INPUT_FILETEMPLATE#'./data/compressed_file_size/*'
         self.exp_dict = {}#key:value <==> expid:[packet_size]
-        self.expid_dict = {}#key:value <===> expid:filename
+        self.meta_dict = {}#key:value <===> expid:filename
         
         #initialize data
         self.parse_files()
@@ -65,16 +68,19 @@ class FILEPARSER:
         return fbasename
         
     def parse_file(self, fp):
-        dat = open(fp, 'r').read().split('\n')[3:-1]
-        dat = [int(float(item)) for item in dat]
-        return dat
+        datraw = open(fp, 'r').read().split('\n')[3:-1]
+        fps = float(datraw[0].replace('FPS:', ''))
+        length = float(datraw[1].replace('Duration: 0:', ''))
+        dat = [int(float(item)) for item in datraw]
+        return fps, length, dat
     
     def parse_files(self):
         fp_list = glob.glob(self.fptemplate)
         for expid,fp in enumerate(fp_list):
             fbasename = self.parse_expid_from_fname(fp)
-            self.exp_dict[expid] = self.parse_file(fp)
-            self.expid_dict[expid] = fbasename
+            fps, length, dat = self.parse_file(fp)
+            self.exp_dict[expid] = dat
+            self.meta_dict[expid] = {'fbasename': fbasename, 'fps': fps, 'length': length}
     
     #INTERFACE FUNCTION
     def return_dat(self, expid):
@@ -93,6 +99,6 @@ class FILEPARSER:
     def return_fplist(self, expid):
         return 
     
-    def return_expid_dict(self):
-        return self.expid_dict
+    def return_metadict(self):
+        return self.meta_dict
     
