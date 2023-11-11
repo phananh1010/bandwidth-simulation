@@ -22,11 +22,11 @@ This program simulate the stall when sending package from client to server.The c
 The arrival timestamp for each frame will be logged, and we simulate total stalling time for each approach.
 
 #### How to run it?
-a) Use `.sh` script to start the server, it will run `n` server process, each server corresponds to a file in the `./logs/` folder.
+a) Use `.sh` script to start the server, it will run `n` server process, each server corresponds to a file in the `./data/compressed_file_size` folder.
 ```
 ./runexp.sh -s server
 ```
-b) Use `.sh` script to start the clients. This script will run `n` client process, each corresponds to a file in the `./logs/` folder.
+b) Use `.sh` script to start the clients. This script will run `n` client process, each corresponds to a file in the `./data/compressed_file_size` folder.
 ```
 ./runexp.sh -s client
 ```
@@ -35,7 +35,7 @@ c) Simulate the playback to calculate playback stall
 ./runexp.sh -s delay
 ```
 
-d) Use this Python code to get delay for each experiment. Note that each experiment correspond to a file in the `./logs/` folder
+d) Use this Python code to get delay for each experiment. Note that each experiment correspond to a file in the `./data/compressed_file_size` folder
 ```
 import pickle
 pickle.load(open('./logs/delay', 'rb'))#bandwidth mean is 1.5Mbps
