@@ -2,23 +2,29 @@ from collections import deque
 import numpy as np
 import pickle
 import sys
+import time
 import argparse
 
 import header
 import msgorganizer
 import imp
+import server
+import client
 imp.reload(header)
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-s', '--service')      # option that takes a value
+parser.add_argument('-f', '--ipnbOnly')
 
 args = parser.parse_args()
-if args.service == None or args.service not in {header.CLIENT, header.SERVER, header.DELAY}:
-    print ('ERROR: must specify -s (service), service take values [{header.CLIENT, header.SERVER, header.DELAY}]')
-    raise
+if args.ipnbOnly != None:
+        service = header.DEV_MODE
+elif args.service == None or args.service not in {header.CLIENT, header.SERVER, header.DELAY, header.DEV_MODE}:
+        print ('ERROR: must specify -s (service), service take values [{header.CLIENT, header.SERVER, header.DELAY}]')
+        raise
 else:
-    service     = args.service
+        service     = args.service
 
 class PlaybackBuffer:
     #BUFFER_SIZE = 10 #10 frames max
@@ -60,12 +66,12 @@ class PlaybackBuffer:
 
 class Playback:
     def __init__(self, expid):
-        self.expid = 1
+        self.expid = expid
         self.fps   = header.FPS
         self.fp    = header.LOG_FILETEMPLATE.format(expid)
         self.delay_list      = []
-        fparse = msgorganizer.FILEPARSER()
-        meta = fparse.return_metadict()[expid]
+        self.fparse = msgorganizer.FILEPARSER()
+        self.meta = fparse.return_metadict()[expid]
         
     #### INTERFACE FUNCTIONS
     def play(self, verbose=True):
@@ -77,7 +83,7 @@ class Playback:
         playback_time   = 0
         fps             = self.fps
         frame_idx       = int(playback_time * fps)
-        for system_time in np.arange(0, 5, 1/fps):
+        for system_time in np.arange(0, self.meta['length'], 1/fps):
             pb.receive(system_time)
             is_frame  = pb.pop(frame_idx)
             if verbose==True: print (f'have frame? {is_frame}, buffer: {len(pb.buffer)}')
@@ -93,10 +99,15 @@ class Playback:
     
 def sim_server():
     #TODO: simulate transferring packets of server for all experiments
+    for port_offset, expid in enumerate(expid_list):
+        server.run(expid, port_offset)
     return
 
 def sim_client():
     #TODO: simulate transferring packets of clients for all experiments
+    for port_offset, expid in enumerate(expid_list):
+        client.run(expid, port_offset)
+        time.sleep(35)
     return 
 
 def sim_delay():
@@ -116,6 +127,10 @@ expid_list = list(meta.keys())
 if __name__ == '__main__':
     if service == header.CLIENT:
         print ('processing client')
+        sim_client()
+    elif service == header.SERVER:
+        print ('processing server')
+        sim_server()
     elif service == header.DELAY:
         print ('processing delay')
         sim_delay()

@@ -27,6 +27,7 @@ class Msg:
             datitem = self.dat_dict[fp]
             result.append(idx)
             idx = idx + len(datitem)
+        result.append(idx) #we add the last index (end guard) to check the last element
         return result
     
     def getMsgIndex(self, byteIndex):
@@ -35,11 +36,13 @@ class Msg:
             return -1
         if byteIndex == self.byteIndexList[0]:
             return byteIndex
-        for i in range(1, len(self.fp_list)):
+        for i in range(1, len(self.byteIndexList)):
             len1, len2 = self.byteIndexList[i-1], self.byteIndexList[i]
-            if len1 < byteIndex and byteIndex < len2:
+            if len1 <= byteIndex and byteIndex <= len2:
                 return len1
-        return len2
+        print ('There is no way you should reach this point')
+        print (byteIndex, self.byteIndexList)
+        raise
         
     def __getitem__(self, idx):
         fp = self.fp_list[idx]
@@ -68,10 +71,10 @@ class FILEPARSER:
         return fbasename
         
     def parse_file(self, fp):
-        datraw = open(fp, 'r').read().split('\n')[3:-1]
+        datraw = open(fp, 'r').read().split('\n')[:-1]
         fps = float(datraw[0].replace('FPS:', ''))
         length = float(datraw[1].replace('Duration: 0:', ''))
-        dat = [int(float(item)) for item in datraw]
+        dat = [int(float(item)) * header.MSG_SIZE_FACTOR for item in datraw[3:]]
         return fps, length, dat
     
     def parse_files(self):

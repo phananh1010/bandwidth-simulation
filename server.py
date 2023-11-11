@@ -13,13 +13,13 @@ import header
 
 
 host="0.0.0.0"
-port=1891
+port=header.PORT
 
 
 
 
 
-def accept(s):
+def accept(s, expid):
     #TODO: accept one connection, process, write to file, and close connection
     
     byteidx = 0
@@ -38,12 +38,13 @@ def accept(s):
         else:
             #print (f"just received data of len:{len(d)}")
             byteidx += len(d)
-            if msg.getMsgIndex(byteidx) > -1:
-                if byteidx not in msgidx_list:
-                    msgidx_list.add(byteidx)
+            msgidx  = msg.getMsgIndex(byteidx)
+            if msgidx > -1:
+                if msgidx not in msgidx_list:
+                    msgidx_list.add(msgidx)
                     received_time = time.time()
                     transfer_time = (received_time - btime)*1000
-                    #print (f'New message received, msg_index: {len(msgidx_list)}, byte_index: {byteidx}, received_time:{received_time}, transfer_time: {transfer_time}')
+                    print (f'New message received, msg_number:{len(msgidx_list)}  msg_index: {msgidx}, byte_index: {byteidx}, received_time:{received_time}, transfer_time: {transfer_time}')
                     log.append(received_time)
     print (f"total transmission time for all packets: {time.time() - btime0} seconds")
     log = [item - log[0] for item in log[1:]]
@@ -52,12 +53,12 @@ def accept(s):
     return log
 
 
-def run(expid):
+def run(expid, port_offset=0):
     s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((host,port))
+    s.bind((host,port+port_offset))
     s.listen(1)
     #N_MESSAGE = len(glob.glob('./data/compressed/compress_adv_2740/*'))#we are suppose to receive a pre-defined number of frame, no more
-    accept(s)
+    accept(s, expid)
 
 
 if __name__ == "__main__":
