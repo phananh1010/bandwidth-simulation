@@ -16,6 +16,9 @@ DELAY    = 'delay'
 DEV_MODE = 'dev_mode'
 
 
+SIM_MODE_NEW_RUNNING = 'new-run'
+SIM_MODE_CONTINUE    = 'continue'
+
 
 #FILEPARSER ADJUSTMENT PARAMETERS
 MSG_SIZE_FACTOR =  2

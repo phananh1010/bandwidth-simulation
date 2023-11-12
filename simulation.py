@@ -16,6 +16,7 @@ imp.reload(header)
 parser = argparse.ArgumentParser()
 parser.add_argument('-s', '--service')      # option that takes a value
 parser.add_argument('-f', '--ipnbOnly')
+parser.add_argument('-m', '--simMode', default=header.SIM_MODE_NEW_RUNNING)
 
 args = parser.parse_args()
 if args.ipnbOnly != None:
@@ -25,6 +26,7 @@ elif args.service == None or args.service not in {header.CLIENT, header.SERVER, 
         raise
 else:
         service     = args.service
+        sim_mode    = args.simMode
 
 class PlaybackBuffer:
     #BUFFER_SIZE = 10 #10 frames max
@@ -107,7 +109,7 @@ def sim_client():
     #TODO: simulate transferring packets of clients for all experiments
     for port_offset, expid in enumerate(expid_list):
         client.run(expid, port_offset)
-        time.sleep(35)
+        time.sleep(15)
     return 
 
 def sim_delay():
@@ -123,7 +125,13 @@ def sim_delay():
 
 fparse = msgorganizer.FILEPARSER()
 meta = fparse.return_metadict()         
-expid_list = list(meta.keys())        
+expid_list = list(meta.keys())
+
+if sim_mode == header.SIM_MODE_CONTINUE:
+    #This mode indicate that we will continue running instead of running from very beginning
+    expid_ran_list = set(pickle.load(open('./logs/delay', 'rb')).keys())
+    expid_list = [expid for expid in expid_list if expid not in expid_ran_list]
+    
 if __name__ == '__main__':
     if service == header.CLIENT:
         print ('processing client')

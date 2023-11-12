@@ -9,9 +9,10 @@ NOTE: `mm-link` and `mm-delay` shell must be created at the client, so that clie
 The merged FCC bandwidth traces, converted into mahimahi format, were backuped into `onelive` cloud, in `workspace` directory, `bandwidth-simulation` sub-directory.
 
 ```
+cd /apps/workspace/bandwidth-simulation/
 mm-delay 200 #delay 50 miliseconds
 mm-link /apps/workspace/data/bandwidth-trace/pensive/fcc/202008/mahimahi/merged_trace  /apps/workspace/data/bandwidth-trace/pensive/link12Mbps.trace  #uplink downlink
-    mm-link /apps/workspace/data/bandwidth-trace/pensive/link3Mbps.trace  /apps/workspace/data/bandwidth-trace/pensive/link3Mbps.trace  #uplink downlink
+mm-link /apps/workspace/data/bandwidth-trace/pensive/link3Mbps.trace  /apps/workspace/data/bandwidth-trace/pensive/link3Mbps.trace  #uplink downlink
 mamba activate env_tile_streaming
 ```
 # STEP 1 - use the program
@@ -24,11 +25,11 @@ The arrival timestamp for each frame will be logged, and we simulate total stall
 #### How to run it?
 a) Use `.sh` script to start the server, it will run `n` server process, each server corresponds to a file in the `./data/compressed_file_size` folder.
 ```
-./runexp.sh -s server
+./runexp.sh server new-run
 ```
 b) Use `.sh` script to start the clients. This script will run `n` client process, each corresponds to a file in the `./data/compressed_file_size` folder.
 ```
-./runexp.sh -s client
+./runexp.sh -s client new-run
 ```
 c) Simulate the playback to calculate playback stall
 ```
@@ -49,3 +50,5 @@ fparse = msgorganizer.FILEPARSER()
 meta = fparse.return_metadict()         
 meta
 ```
+
+NOTE: if you were in the middle of experiment and it suddently ended, you could use `continue` parameter for BOTH client and server to continue the experiment
