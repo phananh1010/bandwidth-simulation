@@ -52,3 +52,7 @@ meta
 ```
 
 NOTE: if you were in the middle of experiment and it suddently ended, you could use `continue` parameter for BOTH client and server to continue the experiment
+
+
+# STEP2 - Visualization
+Go to `viz.ipyng` to export the results
