@@ -29,7 +29,7 @@ a) Use `.sh` script to start the server, it will run `n` server process, each se
 ```
 b) Use `.sh` script to start the clients. This script will run `n` client process, each corresponds to a file in the `./data/compressed_file_size` folder.
 ```
-./runexp.sh -s client new-run
+./runexp.sh client new-run
 ```
 c) Simulate the playback to calculate playback stall
 ```
